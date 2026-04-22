@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      - name: Set Docker config and login
         run: |
           export DOCKER_CONFIG=/tmp/docker-config
           mkdir -p $DOCKER_CONFIG
@@ -25,6 +25,8 @@ jobs:
 
       - name: Build and push Backend
         uses: docker/build-push-action@v5
+        env:
+          DOCKER_CONFIG: /tmp/docker-config
         with:
           context: ./
           push: true
@@ -32,6 +34,8 @@ jobs:
 
       - name: Build and push Frontend
         uses: docker/build-push-action@v5
+        env:
+          DOCKER_CONFIG: /tmp/docker-config
         with:
           context: ./templates
           push: true
@@ -45,10 +49,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.SECRET }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Set Docker config and login
+        run: |
+          export DOCKER_CONFIG=/tmp/docker-config
+          mkdir -p $DOCKER_CONFIG
+          echo "${{ secrets.SECRET }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Pull latest images
+        env:
+          DOCKER_CONFIG: /tmp/docker-config
         run: |
           docker pull ghcr.io/zahmadz/week3_repo:latest
           docker pull ghcr.io/zahmadz/week3_repo/templates:latest
@@ -59,5 +68,3 @@ jobs:
           docker-compose down
           docker system prune -f
           docker-compose up -d
-          
-
