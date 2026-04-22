@@ -1,0 +1,62 @@
+name: Self-Hosted CI/CD
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.SECRET }}
+
+      - name: Build and push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./
+          push: true
+          tags: ghcr.io/zAhmaDz/week3_repo:latest
+
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./templates
+          push: true
+          tags: ghcr.io/zAhmaDz/week3_repo/templates:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.SECRET }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull latest images
+        run: |
+          docker pull ghcr.io/zAhmaDz/week3_repo:latest
+          docker pull ghcr.io/zAhmaDz/week3_repo/templates:latest
+
+      - name: Run new containers
+        run: |
+          cd /home/cybersecurity/some
+          docker-compose down
+          docker system prune -f
+          docker-compose up -d
