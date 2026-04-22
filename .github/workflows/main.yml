@@ -65,6 +65,6 @@ jobs:
       - name: Run new containers
         run: |
           cd /home/cybersecurity/some
-          docker-compose down
+          docker compose down
           docker system prune -f
-          docker-compose up -d
+          docker compose up -d
