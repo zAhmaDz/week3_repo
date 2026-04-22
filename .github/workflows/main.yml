@@ -28,14 +28,14 @@ jobs:
         with:
           context: ./
           push: true
-          tags: ghcr.io/zahmaDz/week3_repo:latest
+          tags: ghcr.io/zahmadz/week3_repo:latest
 
       - name: Build and push Frontend
         uses: docker/build-push-action@v5
         with:
           context: ./templates
           push: true
-          tags: ghcr.io/zahmaDz/week3_repo/templates:latest
+          tags: ghcr.io/zahmadz/week3_repo/templates:latest
 
   deploy:
     needs: build-and-push
@@ -50,8 +50,8 @@ jobs:
 
       - name: Pull latest images
         run: |
-          docker pull ghcr.io/zahmaDz/week3_repo:latest
-          docker pull ghcr.io/zahmaDz/week3_repo/templates:latest
+          docker pull ghcr.io/zahmadz/week3_repo:latest
+          docker pull ghcr.io/zahmadz/week3_repo/templates:latest
 
       - name: Run new containers
         run: |
