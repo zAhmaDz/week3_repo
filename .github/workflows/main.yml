@@ -67,4 +67,6 @@ jobs:
           cd /home/cybersecurity/some
           docker compose down
           docker system prune -f
+          ./vault-secret.sh
           docker compose up -d
+          
