@@ -8,6 +8,9 @@ on:
 jobs:
   build-and-push:
     runs-on: self-hosted
+    # This env block tells GitHub Actions to use the Docker Desktop socket
+    env:
+      DOCKER_HOST: unix:///home/cybersecurity/.docker/desktop/docker.sock
 
     permissions:
       contents: read
@@ -44,6 +47,8 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: self-hosted
+    env:
+      DOCKER_HOST: unix:///home/cybersecurity/.docker/desktop/docker.sock
 
     steps:
       - name: Checkout code
@@ -65,8 +70,12 @@ jobs:
       - name: Run new containers
         run: |
           cd /home/cybersecurity/some
+          # Stop current containers
           docker compose down
+          # Clean up old images/cache
           docker system prune -f
+          # Fetch secrets from Vault and generate .env
+          chmod +x ./vault-secret.sh
           ./vault-secret.sh
-          docker compose up -d
-          
+          # Start with explicit .env file reference to ensure variables are loaded
+          docker compose --env-file .env up -d
